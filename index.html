@@ -1,0 +1,1467 @@
+<!doctype html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>REGRAS ABSOLUTAS</title>
+    <meta
+      name="description"
+      content="Códice único e inflexível para escrever regras absolutas, com abertura cinematográfica de guerra e interface sombria."
+    />
+    <meta property="og:title" content="REGRAS ABSOLUTAS" />
+    <meta
+      property="og:description"
+      content="Códice único e inflexível para escrever regras absolutas, com abertura cinematográfica de guerra e interface sombria."
+    />
+    <meta property="og:type" content="website" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600;700;900&family=IBM+Plex+Mono:wght@400;500;600&family=Plus+Jakarta+Sans:wght@400;500;600&display=swap"
+      rel="stylesheet"
+    />
+    <style>
+      :root {
+        --bg-void: #050506;
+        --bg-chamber: #0a0a0c;
+        --bg-monolith: #101013;
+        --bg-monolith-elevated: #151519;
+        --border-hairline: rgba(255, 255, 255, 0.08);
+        --border-iron: rgba(255, 255, 255, 0.14);
+        --border-crimson: rgba(185, 28, 28, 0.45);
+        --text-bone: #ece8df;
+        --text-ash: #938e85;
+        --text-soot: #5c5852;
+        --accent-crimson: #b91c1c;
+        --accent-crimson-bright: #dc2626;
+        --accent-ember: #ea580c;
+        --accent-brass: #c29b61;
+        --font-display: 'Cinzel', Georgia, 'Times New Roman', serif;
+        --font-sans: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+        --font-mono: 'IBM Plex Mono', ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+      }
+
+      *,
+      *::before,
+      *::after {
+        box-sizing: border-box;
+      }
+
+      html,
+      body {
+        margin: 0;
+        padding: 0;
+        min-height: 100%;
+        background-color: var(--bg-void);
+        color: var(--text-bone);
+        font-family: var(--font-sans);
+        -webkit-font-smoothing: antialiased;
+        -moz-osx-font-smoothing: grayscale;
+        overflow-x: hidden;
+      }
+
+      [hidden] {
+        display: none !important;
+      }
+
+      ::selection {
+        background: rgba(185, 28, 28, 0.48);
+        color: #ffffff;
+      }
+
+      /* Atmospheric background layers */
+      .chamber-backdrop {
+        position: fixed;
+        inset: 0;
+        z-index: 0;
+        pointer-events: none;
+        background:
+          radial-gradient(ellipse 70% 45% at 50% 0%, rgba(127, 29, 29, 0.16) 0%, transparent 70%),
+          radial-gradient(ellipse 60% 50% at 50% 100%, rgba(45, 10, 10, 0.18) 0%, transparent 72%),
+          linear-gradient(180deg, #050506 0%, #09090b 55%, #040405 100%);
+      }
+
+      .chamber-vignette {
+        position: fixed;
+        inset: 0;
+        z-index: 1;
+        pointer-events: none;
+        background: radial-gradient(circle at 50% 48%, transparent 40%, rgba(0, 0, 0, 0.78) 100%);
+      }
+
+      .chamber-scanlines {
+        position: fixed;
+        inset: 0;
+        z-index: 2;
+        pointer-events: none;
+        opacity: 0.035;
+        background-image: repeating-linear-gradient(
+          0deg,
+          rgba(255, 255, 255, 0.5) 0px,
+          rgba(255, 255, 255, 0.5) 1px,
+          transparent 1px,
+          transparent 3px
+        );
+      }
+
+      #ash-canvas {
+        position: fixed;
+        inset: 0;
+        width: 100%;
+        height: 100%;
+        z-index: 1;
+        pointer-events: none;
+      }
+
+      /* =====================================================
+         CINEMATIC WAR-FILM INTRO OVERLAY
+         ===================================================== */
+      .war-intro {
+        position: fixed;
+        inset: 0;
+        z-index: 50;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: #020203;
+        overflow: hidden;
+        transition: opacity 0.65s cubic-bezier(0.16, 1, 0.3, 1);
+      }
+
+      .war-intro.is-hidden {
+        opacity: 0;
+        pointer-events: none;
+        visibility: hidden;
+      }
+
+      .war-intro-shutter-top,
+      .war-intro-shutter-bottom {
+        position: absolute;
+        left: 0;
+        right: 0;
+        height: 50%;
+        background: #030304;
+        z-index: 2;
+        will-change: transform;
+      }
+
+      .war-intro-shutter-top {
+        top: 0;
+        border-bottom: 1px solid rgba(185, 28, 28, 0.25);
+      }
+
+      .war-intro-shutter-bottom {
+        bottom: 0;
+        border-top: 1px solid rgba(185, 28, 28, 0.25);
+      }
+
+      .war-intro.is-active .war-intro-shutter-top {
+        animation: shutter-top-open 0.75s cubic-bezier(0.77, 0, 0.175, 1) 3.05s forwards;
+      }
+
+      .war-intro.is-active .war-intro-shutter-bottom {
+        animation: shutter-bottom-open 0.75s cubic-bezier(0.77, 0, 0.175, 1) 3.05s forwards;
+      }
+
+      .war-intro-stage {
+        position: relative;
+        z-index: 5;
+        width: min(92vw, 960px);
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        text-align: center;
+        padding: 32px 20px;
+        will-change: transform, opacity;
+      }
+
+      .war-intro.is-active .war-intro-stage {
+        animation:
+          intro-tremor 0.35s ease-out 0.95s,
+          intro-stage-exit 0.55s cubic-bezier(0.16, 1, 0.3, 1) 2.95s forwards;
+      }
+
+      /* Crimson Horizon Beam */
+      .war-horizon {
+        position: absolute;
+        left: 50%;
+        top: 50%;
+        width: min(92vw, 920px);
+        height: 2px;
+        transform: translate(-50%, -50%) scaleX(0);
+        background: linear-gradient(
+          90deg,
+          transparent 0%,
+          rgba(185, 28, 28, 0.6) 18%,
+          #f87171 50%,
+          rgba(185, 28, 28, 0.6) 82%,
+          transparent 100%
+        );
+        box-shadow: 0 0 28px rgba(220, 38, 38, 0.85), 0 0 70px rgba(185, 28, 28, 0.55);
+        z-index: 4;
+        opacity: 0;
+        will-change: transform, opacity;
+      }
+
+      .war-intro.is-active .war-horizon {
+        animation: horizon-slice 1.6s cubic-bezier(0.16, 1, 0.3, 1) 0.25s forwards;
+      }
+
+      /* Expanding Shockwave Ring */
+      .war-shockwave {
+        position: absolute;
+        left: 50%;
+        top: 50%;
+        width: 240px;
+        height: 240px;
+        border-radius: 9999px;
+        border: 1px solid rgba(220, 38, 38, 0.55);
+        transform: translate(-50%, -50%) scale(0.2);
+        opacity: 0;
+        z-index: 3;
+        pointer-events: none;
+        will-change: transform, opacity;
+      }
+
+      .war-intro.is-active .war-shockwave {
+        animation: shockwave-pulse 1.3s cubic-bezier(0.16, 1, 0.3, 1) 1.05s forwards;
+      }
+
+      /* Sovereign Crest */
+      .war-crest {
+        width: 76px;
+        height: 76px;
+        margin-bottom: 24px;
+        opacity: 0;
+        transform: scale(1.65);
+        filter: drop-shadow(0 0 24px rgba(185, 28, 28, 0.45));
+        will-change: transform, opacity, filter;
+      }
+
+      .war-intro.is-active .war-crest {
+        animation: crest-slam 0.85s cubic-bezier(0.16, 1, 0.3, 1) 0.95s forwards;
+      }
+
+      /* Monumental War Title */
+      .war-kicker {
+        font-family: var(--font-mono);
+        font-size: 12px;
+        font-weight: 500;
+        letter-spacing: 0.34em;
+        text-transform: uppercase;
+        color: var(--accent-brass);
+        margin: 0 0 14px 0;
+        opacity: 0;
+        transform: translateY(8px);
+      }
+
+      .war-intro.is-active .war-kicker {
+        animation: fade-rise 0.65s cubic-bezier(0.16, 1, 0.3, 1) 0.8s forwards;
+      }
+
+      .war-title {
+        font-family: var(--font-display);
+        font-size: clamp(2.15rem, 6.2vw, 4.85rem);
+        font-weight: 900;
+        line-height: 1.05;
+        letter-spacing: 0.38em;
+        margin: 0;
+        color: var(--text-bone);
+        text-shadow: 0 12px 42px rgba(0, 0, 0, 0.95), 0 0 32px rgba(185, 28, 28, 0.25);
+        opacity: 0;
+        transform: scale(1.18);
+        will-change: transform, opacity, letter-spacing;
+      }
+
+      .war-intro.is-active .war-title {
+        animation: title-monolith 1.35s cubic-bezier(0.16, 1, 0.3, 1) 1.15s forwards;
+      }
+
+      .war-divider {
+        width: min(72vw, 380px);
+        height: 1px;
+        margin: 22px auto 18px;
+        background: linear-gradient(90deg, transparent, rgba(220, 38, 38, 0.85), transparent);
+        transform: scaleX(0);
+        opacity: 0;
+        will-change: transform, opacity;
+      }
+
+      .war-intro.is-active .war-divider {
+        animation: divider-draw 0.8s cubic-bezier(0.16, 1, 0.3, 1) 1.65s forwards;
+      }
+
+      .war-subline {
+        font-family: var(--font-mono);
+        font-size: clamp(0.72rem, 1.4vw, 0.875rem);
+        font-weight: 500;
+        letter-spacing: 0.26em;
+        color: #b8b2a6;
+        margin: 0;
+        opacity: 0;
+        transform: translateY(10px);
+      }
+
+      .war-intro.is-active .war-subline {
+        animation: fade-rise 0.75s cubic-bezier(0.16, 1, 0.3, 1) 1.95s forwards;
+      }
+
+      .war-skip-btn {
+        position: absolute;
+        right: 28px;
+        bottom: 24px;
+        z-index: 10;
+        min-height: 40px;
+        padding: 8px 18px;
+        background: rgba(16, 16, 19, 0.82);
+        border: 1px solid rgba(255, 255, 255, 0.16);
+        color: var(--text-ash);
+        font-family: var(--font-mono);
+        font-size: 12px;
+        letter-spacing: 0.12em;
+        text-transform: uppercase;
+        cursor: pointer;
+        transition: color 0.15s ease, border-color 0.15s ease, background-color 0.15s ease;
+      }
+
+      .war-skip-btn:hover,
+      .war-skip-btn:focus-visible {
+        color: var(--text-bone);
+        border-color: var(--accent-crimson-bright);
+        background: rgba(28, 12, 12, 0.9);
+        outline: 2px solid var(--accent-crimson-bright);
+        outline-offset: 2px;
+      }
+
+      /* Intro Keyframes (Compositor-only + letter-spacing settle) */
+      @keyframes horizon-slice {
+        0% {
+          opacity: 0;
+          transform: translate(-50%, -50%) scaleX(0);
+        }
+        28% {
+          opacity: 1;
+          transform: translate(-50%, -50%) scaleX(1);
+        }
+        68% {
+          opacity: 0.85;
+          transform: translate(-50%, -50%) scaleX(1);
+        }
+        100% {
+          opacity: 0;
+          transform: translate(-50%, -50%) scaleX(1.15);
+        }
+      }
+
+      @keyframes shockwave-pulse {
+        0% {
+          opacity: 0.85;
+          transform: translate(-50%, -50%) scale(0.2);
+        }
+        100% {
+          opacity: 0;
+          transform: translate(-50%, -50%) scale(4.2);
+        }
+      }
+
+      @keyframes crest-slam {
+        0% {
+          opacity: 0;
+          transform: scale(1.75);
+        }
+        65% {
+          opacity: 1;
+          transform: scale(0.97);
+        }
+        100% {
+          opacity: 1;
+          transform: scale(1);
+        }
+      }
+
+      @keyframes title-monolith {
+        0% {
+          opacity: 0;
+          transform: scale(1.18);
+          letter-spacing: 0.36em;
+        }
+        45% {
+          opacity: 1;
+        }
+        100% {
+          opacity: 1;
+          transform: scale(1);
+          letter-spacing: 0.18em;
+        }
+      }
+
+      @keyframes divider-draw {
+        0% {
+          opacity: 0;
+          transform: scaleX(0);
+        }
+        100% {
+          opacity: 1;
+          transform: scaleX(1);
+        }
+      }
+
+      @keyframes fade-rise {
+        0% {
+          opacity: 0;
+          transform: translateY(10px);
+        }
+        100% {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
+
+      @keyframes intro-tremor {
+        0%,
+        100% {
+          transform: translate3d(0, 0, 0);
+        }
+        20% {
+          transform: translate3d(-3px, 2px, 0);
+        }
+        45% {
+          transform: translate3d(3px, -2px, 0);
+        }
+        70% {
+          transform: translate3d(-2px, 1px, 0);
+        }
+      }
+
+      @keyframes intro-stage-exit {
+        0% {
+          opacity: 1;
+          transform: scale(1);
+        }
+        100% {
+          opacity: 0;
+          transform: scale(0.96);
+        }
+      }
+
+      @keyframes shutter-top-open {
+        0% {
+          transform: translateY(0);
+        }
+        100% {
+          transform: translateY(-102%);
+        }
+      }
+
+      @keyframes shutter-bottom-open {
+        0% {
+          transform: translateY(0);
+        }
+        100% {
+          transform: translateY(102%);
+        }
+      }
+
+      /* =====================================================
+         MAIN WORKSPACE SHELL
+         ===================================================== */
+      .app-shell {
+        position: relative;
+        z-index: 10;
+        min-height: 100vh;
+        display: flex;
+        flex-direction: column;
+        opacity: 0;
+        transform: translateY(10px);
+        transition: opacity 0.6s cubic-bezier(0.16, 1, 0.3, 1), transform 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+      }
+
+      body[data-state='ready'] .app-shell {
+        opacity: 1;
+        transform: translateY(0);
+      }
+
+      /* 3-Zone Top Bar Contract */
+      .top-bar {
+        width: 100%;
+        border-bottom: 1px solid var(--border-hairline);
+        background: rgba(8, 8, 10, 0.88);
+        backdrop-filter: blur(8px);
+      }
+
+      .top-bar-inner {
+        max-width: 1120px;
+        margin: 0 auto;
+        padding: 14px 24px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 32px;
+      }
+
+      .brand-lockup {
+        display: inline-flex;
+        align-items: center;
+        gap: 10px;
+        color: var(--text-bone);
+        text-decoration: none;
+        font-family: var(--font-display);
+        font-size: 16px;
+        font-weight: 700;
+        letter-spacing: 0.14em;
+        white-space: nowrap;
+        flex-shrink: 0;
+      }
+
+      .brand-crest {
+        width: 22px;
+        height: 22px;
+        color: var(--accent-crimson-bright);
+        flex-shrink: 0;
+      }
+
+      .top-meta {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        font-family: var(--font-mono);
+        font-size: 12px;
+        color: var(--text-ash);
+        font-variant-numeric: tabular-nums;
+        white-space: nowrap;
+      }
+
+      .meta-sep {
+        color: var(--text-soot);
+        user-select: none;
+      }
+
+      .top-actions {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        flex-shrink: 0;
+      }
+
+      .btn-ghost {
+        min-height: 40px;
+        padding: 8px 14px;
+        background: transparent;
+        border: 1px solid var(--border-iron);
+        color: var(--text-bone);
+        font-family: var(--font-sans);
+        font-size: 13px;
+        font-weight: 500;
+        white-space: nowrap;
+        flex-shrink: 0;
+        cursor: pointer;
+        transition:
+          background-color 0.15s ease,
+          border-color 0.15s ease,
+          color 0.15s ease;
+      }
+
+      .btn-ghost:hover {
+        background: rgba(255, 255, 255, 0.05);
+        border-color: rgba(255, 255, 255, 0.28);
+      }
+
+      .btn-ghost:focus-visible,
+      .btn-danger:focus-visible,
+      .btn-primary:focus-visible {
+        outline: 2px solid var(--accent-crimson-bright);
+        outline-offset: 2px;
+      }
+
+      .btn-primary {
+        min-height: 40px;
+        padding: 8px 16px;
+        background: var(--accent-crimson);
+        border: 1px solid var(--accent-crimson-bright);
+        color: #ffffff;
+        font-family: var(--font-sans);
+        font-size: 13px;
+        font-weight: 600;
+        white-space: nowrap;
+        flex-shrink: 0;
+        cursor: pointer;
+        transition: background-color 0.15s ease, transform 0.12s ease;
+      }
+
+      .btn-primary:hover {
+        background: var(--accent-crimson-bright);
+      }
+
+      .btn-primary:active {
+        transform: translateY(1px);
+      }
+
+      .btn-danger {
+        min-height: 40px;
+        padding: 8px 14px;
+        background: rgba(127, 29, 29, 0.22);
+        border: 1px solid rgba(185, 28, 28, 0.5);
+        color: #fca5a5;
+        font-family: var(--font-sans);
+        font-size: 13px;
+        font-weight: 500;
+        white-space: nowrap;
+        flex-shrink: 0;
+        cursor: pointer;
+        transition: background-color 0.15s ease, border-color 0.15s ease, color 0.15s ease;
+      }
+
+      .btn-danger:hover {
+        background: rgba(185, 28, 28, 0.38);
+        border-color: var(--accent-crimson-bright);
+        color: #ffffff;
+      }
+
+      /* Main Monolith Container */
+      .chamber-main {
+        flex: 1;
+        width: 100%;
+        max-width: 960px;
+        margin: 0 auto;
+        padding: 36px 24px 40px;
+        display: flex;
+        flex-direction: column;
+      }
+
+      .monolith-intro-band {
+        margin-bottom: 24px;
+        display: flex;
+        align-items: flex-end;
+        justify-content: space-between;
+        gap: 24px;
+      }
+
+      .monolith-heading {
+        font-family: var(--font-display);
+        font-size: clamp(1.75rem, 3.2vw, 2.5rem);
+        font-weight: 700;
+        line-height: 1.15;
+        letter-spacing: 0.08em;
+        margin: 0 0 6px 0;
+        color: var(--text-bone);
+        text-wrap: balance;
+      }
+
+      .monolith-subtitle {
+        margin: 0;
+        font-size: 14px;
+        line-height: 1.55;
+        color: var(--text-ash);
+        max-width: 72ch;
+      }
+
+      /* The Single Notepad Monolith */
+      .codex-monolith {
+        position: relative;
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        min-height: 480px;
+        background: linear-gradient(180deg, var(--bg-monolith-elevated) 0%, var(--bg-monolith) 100%);
+        border: 1px solid var(--border-iron);
+        box-shadow:
+          0 28px 80px rgba(0, 0, 0, 0.82),
+          inset 0 1px 0 rgba(255, 255, 255, 0.05);
+      }
+
+      /* Subtle top crimson horizon line on the monolith */
+      .codex-monolith::before {
+        content: '';
+        position: absolute;
+        top: -1px;
+        left: 0;
+        right: 0;
+        height: 2px;
+        background: linear-gradient(
+          90deg,
+          transparent 0%,
+          rgba(185, 28, 28, 0.85) 35%,
+          #dc2626 50%,
+          rgba(185, 28, 28, 0.85) 65%,
+          transparent 100%
+        );
+        opacity: 0.72;
+        transition: opacity 0.2s ease;
+        pointer-events: none;
+      }
+
+      .codex-monolith.is-writing::before {
+        opacity: 1;
+      }
+
+      /* Architectural corner brackets */
+      .corner-bracket {
+        position: absolute;
+        width: 12px;
+        height: 12px;
+        pointer-events: none;
+        border-color: rgba(220, 38, 38, 0.65);
+        border-style: solid;
+        z-index: 2;
+      }
+
+      .corner-tl {
+        top: -1px;
+        left: -1px;
+        border-width: 2px 0 0 2px;
+      }
+
+      .corner-tr {
+        top: -1px;
+        right: -1px;
+        border-width: 2px 2px 0 0;
+      }
+
+      .corner-bl {
+        bottom: -1px;
+        left: -1px;
+        border-width: 0 0 2px 2px;
+      }
+
+      .corner-br {
+        bottom: -1px;
+        right: -1px;
+        border-width: 0 2px 2px 0;
+      }
+
+      .codex-toolbar {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 16px;
+        padding: 14px 24px;
+        border-bottom: 1px solid var(--border-hairline);
+        background: rgba(5, 5, 6, 0.45);
+      }
+
+      .codex-label {
+        font-family: var(--font-mono);
+        font-size: 12px;
+        font-weight: 600;
+        letter-spacing: 0.18em;
+        color: var(--accent-brass);
+        white-space: nowrap;
+      }
+
+      .codex-toolbar-right {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        flex-wrap: wrap;
+        justify-content: flex-end;
+      }
+
+      .save-status {
+        font-family: var(--font-mono);
+        font-size: 12px;
+        color: var(--text-ash);
+        font-variant-numeric: tabular-nums;
+        white-space: nowrap;
+      }
+
+      .confirm-group {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+      }
+
+      .confirm-prompt {
+        font-size: 12px;
+        color: #fca5a5;
+        white-space: nowrap;
+      }
+
+      /* Single Unified Textarea */
+      .codex-editor-wrap {
+        position: relative;
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+      }
+
+      .codex-textarea {
+        flex: 1;
+        width: 100%;
+        min-height: 420px;
+        padding: 24px 32px;
+        border: 0;
+        outline: none;
+        resize: none;
+        background-color: transparent;
+        background-image: repeating-linear-gradient(
+          to bottom,
+          transparent 0px,
+          transparent 31px,
+          rgba(255, 255, 255, 0.032) 31px,
+          rgba(255, 255, 255, 0.032) 32px
+        );
+        background-position: 0 24px;
+        background-attachment: local;
+        color: var(--text-bone);
+        caret-color: var(--accent-crimson-bright);
+        font-family: var(--font-mono);
+        font-size: 15px;
+        font-weight: 400;
+        line-height: 32px;
+        letter-spacing: 0.015em;
+        scrollbar-width: thin;
+        scrollbar-color: rgba(185, 28, 28, 0.5) transparent;
+      }
+
+      .codex-textarea::placeholder {
+        color: var(--text-soot);
+        font-style: italic;
+      }
+
+      .codex-textarea:focus-visible {
+        box-shadow: inset 0 0 0 1px rgba(185, 28, 28, 0.35);
+      }
+
+      .codex-footer {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 16px;
+        padding: 12px 24px;
+        border-top: 1px solid var(--border-hairline);
+        background: rgba(5, 5, 6, 0.42);
+        font-family: var(--font-mono);
+        font-size: 12px;
+        color: var(--text-ash);
+        font-variant-numeric: tabular-nums;
+      }
+
+      .codex-footer-actions {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+      }
+
+      .sr-only {
+        position: absolute;
+        width: 1px;
+        height: 1px;
+        padding: 0;
+        margin: -1px;
+        overflow: hidden;
+        clip: rect(0, 0, 0, 0);
+        white-space: nowrap;
+        border: 0;
+      }
+
+      /* Responsive Adjustments */
+      @media (max-width: 768px) {
+        .top-bar-inner {
+          padding: 12px 16px;
+          gap: 12px;
+          flex-wrap: wrap;
+        }
+
+        .top-meta {
+          order: 3;
+          width: 100%;
+          font-size: 11px;
+        }
+
+        .chamber-main {
+          padding: 20px 16px 28px;
+        }
+
+        .monolith-intro-band {
+          flex-direction: column;
+          align-items: flex-start;
+          gap: 8px;
+          margin-bottom: 16px;
+        }
+
+        .codex-toolbar {
+          padding: 12px 16px;
+          flex-wrap: wrap;
+        }
+
+        .codex-textarea {
+          padding: 20px 18px;
+          font-size: 14px;
+          min-height: 360px;
+        }
+
+        .codex-footer {
+          padding: 12px 16px;
+          flex-direction: column;
+          align-items: flex-start;
+        }
+
+        .btn-ghost,
+        .btn-primary,
+        .btn-danger,
+        .war-skip-btn {
+          min-height: 44px;
+        }
+      }
+
+      @media (prefers-reduced-motion: reduce) {
+        .war-intro,
+        .war-intro * {
+          animation-duration: 0.01ms !important;
+          animation-delay: 0ms !important;
+          transition-duration: 0.01ms !important;
+        }
+      }
+    </style>
+  </head>
+  <body data-state="intro">
+    <div class="chamber-backdrop" aria-hidden="true"></div>
+    <canvas id="ash-canvas" aria-hidden="true"></canvas>
+    <div class="chamber-vignette" aria-hidden="true"></div>
+    <div class="chamber-scanlines" aria-hidden="true"></div>
+
+    <!-- CINEMATIC WAR-FILM INTRO SEQUENCE (Runs on every entry) -->
+    <section
+      id="war-intro"
+      class="war-intro is-active"
+      aria-label="Abertura cinematográfica"
+      data-intro-phase="active"
+    >
+      <div class="war-intro-shutter-top" aria-hidden="true"></div>
+      <div class="war-intro-shutter-bottom" aria-hidden="true"></div>
+      <div class="war-horizon" aria-hidden="true"></div>
+      <div class="war-shockwave" aria-hidden="true"></div>
+
+      <div class="war-intro-stage">
+        <svg
+          class="war-crest"
+          viewBox="0 0 80 80"
+          fill="none"
+          xmlns="http://www.w3.org/2000/svg"
+          aria-hidden="true"
+        >
+          <path
+            d="M40 4L70 18V42C70 59.5 57.2 71.8 40 76C22.8 71.8 10 59.5 10 42V18L40 4Z"
+            fill="#0D0D10"
+            stroke="#DC2626"
+            stroke-width="2"
+          />
+          <path
+            d="M40 13L61 23V41C61 53.5 52 62.5 40 66C28 62.5 19 53.5 19 41V23L40 13Z"
+            stroke="#C29B61"
+            stroke-opacity="0.7"
+            stroke-width="1.2"
+          />
+          <path d="M40 20V58" stroke="#ECE8DF" stroke-width="2.5" />
+          <path d="M29 31L40 20L51 31" stroke="#DC2626" stroke-width="2" />
+          <path d="M31 45H49" stroke="#C29B61" stroke-width="1.5" />
+        </svg>
+
+        <p class="war-kicker">DOUTRINA SOBERANA</p>
+        <h2 class="war-title">REGRAS ABSOLUTAS</h2>
+        <div class="war-divider" aria-hidden="true"></div>
+        <p class="war-subline">NENHUMA EXCEÇÃO · NENHUM RECURSO · LEI ÚNICA</p>
+      </div>
+
+      <button type="button" id="skip-intro-btn" class="war-skip-btn">
+        Pular abertura
+      </button>
+    </section>
+
+    <!-- MAIN SINGLE-NOTEPAD WORKSPACE -->
+    <div class="app-shell">
+      <header class="top-bar">
+        <div class="top-bar-inner">
+          <a href="#codex-pad" class="brand-lockup">
+            <svg
+              class="brand-crest"
+              viewBox="0 0 24 24"
+              fill="none"
+              xmlns="http://www.w3.org/2000/svg"
+              aria-hidden="true"
+            >
+              <path
+                d="M12 2L21 6.2V12.8C21 17.7 17.1 21.2 12 22.5C6.9 21.2 3 17.7 3 12.8V6.2L12 2Z"
+                stroke="currentColor"
+                stroke-width="1.6"
+              />
+              <path d="M12 6.5V17.5" stroke="#ECE8DF" stroke-width="1.6" />
+              <path d="M8.5 10.5L12 7L15.5 10.5" stroke="currentColor" stroke-width="1.4" />
+            </svg>
+            <span>REGRAS ABSOLUTAS</span>
+          </a>
+
+          <div class="top-meta" aria-live="polite">
+            <span id="meta-rules-count">0 regras</span>
+            <span class="meta-sep" aria-hidden="true">·</span>
+            <span id="meta-words-count">0 palavras</span>
+            <span class="meta-sep" aria-hidden="true">·</span>
+            <span id="meta-save-state">Salvo neste dispositivo</span>
+          </div>
+
+          <div class="top-actions">
+            <button type="button" id="replay-intro-btn" class="btn-ghost">
+              Rever abertura
+            </button>
+            <button type="button" id="copy-rules-btn" class="btn-primary">
+              Copiar regras
+            </button>
+          </div>
+        </div>
+      </header>
+
+      <main class="chamber-main">
+        <div class="monolith-intro-band">
+          <div>
+            <h1 class="monolith-heading">Códice Único de Regras</h1>
+            <p class="monolith-subtitle">
+              Escreva abaixo suas leis inegociáveis. Um único registro permanente — sem abas, sem distrações, sem perdão.
+            </p>
+          </div>
+        </div>
+
+        <section class="codex-monolith" id="codex-monolith" aria-label="Bloco único de regras">
+          <span class="corner-bracket corner-tl" aria-hidden="true"></span>
+          <span class="corner-bracket corner-tr" aria-hidden="true"></span>
+          <span class="corner-bracket corner-bl" aria-hidden="true"></span>
+          <span class="corner-bracket corner-br" aria-hidden="true"></span>
+
+          <div class="codex-toolbar">
+            <span class="codex-label">DECRETO ÚNICO</span>
+
+            <div class="codex-toolbar-right">
+              <span class="save-status" id="last-updated-label">Aguardando registro</span>
+              <button type="button" id="export-txt-btn" class="btn-ghost">
+                Exportar .txt
+              </button>
+
+              <div id="clear-controls">
+                <button type="button" id="clear-request-btn" class="btn-danger">
+                  Apagar tudo
+                </button>
+              </div>
+              <div id="clear-confirm-controls" class="confirm-group" hidden>
+                <span class="confirm-prompt">Expurgar todas as regras?</span>
+                <button type="button" id="clear-confirm-btn" class="btn-danger">
+                  Confirmar
+                </button>
+                <button type="button" id="clear-cancel-btn" class="btn-ghost">
+                  Cancelar
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <div class="codex-editor-wrap">
+            <label for="codex-pad" class="sr-only">Bloco de Regras Absolutas</label>
+            <textarea
+              id="codex-pad"
+              class="codex-textarea"
+              spellcheck="false"
+              placeholder="Escreva a primeira regra absoluta. Uma por linha, sem concessões..."
+            ></textarea>
+          </div>
+
+          <footer class="codex-footer">
+            <span id="footer-chars-count">0 caracteres registrados</span>
+            <span>Armazenamento local contínuo · Ctrl+S para selar</span>
+          </footer>
+        </section>
+      </main>
+    </div>
+
+    <script>
+      (function () {
+        'use strict';
+
+        var STORAGE_TEXT_KEY = 'regras_absolutas_texto_v1';
+        var STORAGE_META_KEY = 'regras_absolutas_atualizado_v1';
+        var INTRO_DURATION_MS = 3850;
+
+        var DEFAULT_RULES = [
+          '1. O que foi decidido aqui não volta à mesa de discussão.',
+          '2. Palavra dada vale mais que explicação tardia.',
+          '3. Disciplina não negocia com cansaço nem com humor.',
+          '4. Quem quebra a própria regra perde o direito de cobrar a dos outros.',
+          '5. Silêncio absoluto antes da execução; resultado fala depois.'
+        ].join('\n');
+
+        var bodyEl = document.body;
+        var introEl = document.getElementById('war-intro');
+        var skipIntroBtn = document.getElementById('skip-intro-btn');
+        var replayIntroBtn = document.getElementById('replay-intro-btn');
+        var padEl = document.getElementById('codex-pad');
+        var monolithEl = document.getElementById('codex-monolith');
+        var rulesCountEl = document.getElementById('meta-rules-count');
+        var wordsCountEl = document.getElementById('meta-words-count');
+        var saveStateEl = document.getElementById('meta-save-state');
+        var lastUpdatedEl = document.getElementById('last-updated-label');
+        var footerCharsEl = document.getElementById('footer-chars-count');
+        var copyBtn = document.getElementById('copy-rules-btn');
+        var exportBtn = document.getElementById('export-txt-btn');
+        var clearControlsEl = document.getElementById('clear-controls');
+        var clearConfirmControlsEl = document.getElementById('clear-confirm-controls');
+        var clearRequestBtn = document.getElementById('clear-request-btn');
+        var clearConfirmBtn = document.getElementById('clear-confirm-btn');
+        var clearCancelBtn = document.getElementById('clear-cancel-btn');
+
+        var introTimer = null;
+        var copyTimer = null;
+        var savePulseTimer = null;
+
+        function computeStats(text) {
+          var normalized = (text || '').replace(/\r\n/g, '\n');
+          var lines = normalized.split('\n');
+          var activeRules = 0;
+          for (var i = 0; i < lines.length; i++) {
+            if (lines[i].trim().length > 0) {
+              activeRules++;
+            }
+          }
+          var trimmed = normalized.trim();
+          var words = trimmed.length === 0 ? 0 : trimmed.split(/\s+/).length;
+          return {
+            rules: activeRules,
+            words: words,
+            chars: normalized.length
+          };
+        }
+
+        function formatRulesLabel(count) {
+          return count === 1 ? '1 regra' : count + ' regras';
+        }
+
+        function formatWordsLabel(count) {
+          return count === 1 ? '1 palavra' : count + ' palavras';
+        }
+
+        function formatCharsLabel(count) {
+          return count === 1 ? '1 caractere registrado' : count + ' caracteres registrados';
+        }
+
+        function formatTime(isoString) {
+          if (!isoString) return 'Registro inicial';
+          try {
+            var date = new Date(isoString);
+            if (isNaN(date.getTime())) return 'Salvo localmente';
+            return (
+              'Atualizado às ' +
+              date.toLocaleTimeString('pt-BR', {
+                hour: '2-digit',
+                minute: '2-digit'
+              })
+            );
+          } catch (_) {
+            return 'Salvo localmente';
+          }
+        }
+
+        function updateStatsUI(text, updatedIso) {
+          var stats = computeStats(text);
+          rulesCountEl.textContent = formatRulesLabel(stats.rules);
+          wordsCountEl.textContent = formatWordsLabel(stats.words);
+          footerCharsEl.textContent = formatCharsLabel(stats.chars);
+          lastUpdatedEl.textContent = formatTime(updatedIso);
+        }
+
+        function loadInitialRules() {
+          var saved = null;
+          var updated = null;
+          try {
+            saved = window.localStorage.getItem(STORAGE_TEXT_KEY);
+            updated = window.localStorage.getItem(STORAGE_META_KEY);
+          } catch (_) {
+            saved = null;
+          }
+
+          if (saved === null) {
+            padEl.value = DEFAULT_RULES;
+            try {
+              var nowIso = new Date().toISOString();
+              window.localStorage.setItem(STORAGE_TEXT_KEY, DEFAULT_RULES);
+              window.localStorage.setItem(STORAGE_META_KEY, nowIso);
+              updated = nowIso;
+            } catch (_) {
+              updated = null;
+            }
+          } else {
+            padEl.value = saved;
+          }
+
+          updateStatsUI(padEl.value, updated);
+        }
+
+        function saveRules(text, labelText) {
+          var nowIso = new Date().toISOString();
+          try {
+            window.localStorage.setItem(STORAGE_TEXT_KEY, text);
+            window.localStorage.setItem(STORAGE_META_KEY, nowIso);
+          } catch (_) {
+            // Ignore quota/storage errors in restricted contexts
+          }
+          updateStatsUI(text, nowIso);
+          saveStateEl.textContent = labelText || 'Salvo neste dispositivo';
+
+          monolithEl.classList.add('is-writing');
+          if (savePulseTimer) clearTimeout(savePulseTimer);
+          savePulseTimer = setTimeout(function () {
+            monolithEl.classList.remove('is-writing');
+          }, 320);
+        }
+
+        // Synthesized Web Audio war-film sub-bass boom (only when user initiates replay)
+        function playWarImpactSound() {
+          try {
+            var AudioCtx = window.AudioContext || window.webkitAudioContext;
+            if (!AudioCtx) return;
+            var ctx = new AudioCtx();
+            var now = ctx.currentTime;
+
+            // Deep sub-bass drop
+            var osc = ctx.createOscillator();
+            var gain = ctx.createGain();
+            osc.type = 'sawtooth';
+            osc.frequency.setValueAtTime(110, now);
+            osc.frequency.exponentialRampToValueAtTime(32, now + 1.4);
+
+            var filter = ctx.createBiquadFilter();
+            filter.type = 'lowpass';
+            filter.frequency.setValueAtTime(220, now);
+            filter.frequency.exponentialRampToValueAtTime(65, now + 1.4);
+
+            gain.gain.setValueAtTime(0.001, now);
+            gain.gain.linearRampToValueAtTime(0.28, now + 0.04);
+            gain.gain.exponentialRampToValueAtTime(0.001, now + 1.8);
+
+            osc.connect(filter);
+            filter.connect(gain);
+            gain.connect(ctx.destination);
+
+            osc.start(now);
+            osc.stop(now + 1.85);
+            setTimeout(function () {
+              if (ctx && typeof ctx.close === 'function') {
+                ctx.close().catch(function () {});
+              }
+            }, 2200);
+          } catch (_) {
+            // Audio unavailable
+          }
+        }
+
+        function finishIntro(focusPad) {
+          if (introTimer) {
+            clearTimeout(introTimer);
+            introTimer = null;
+          }
+          introEl.classList.remove('is-active');
+          introEl.classList.add('is-hidden');
+          introEl.setAttribute('data-intro-phase', 'complete');
+          bodyEl.setAttribute('data-state', 'ready');
+          if (focusPad && padEl) {
+            padEl.focus();
+          }
+        }
+
+        function startIntro(withSound) {
+          if (introTimer) {
+            clearTimeout(introTimer);
+            introTimer = null;
+          }
+
+          var prefersReduced =
+            window.matchMedia &&
+            window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+          if (prefersReduced) {
+            finishIntro(false);
+            return;
+          }
+
+          bodyEl.setAttribute('data-state', 'intro');
+          introEl.classList.remove('is-hidden');
+          introEl.classList.remove('is-active');
+          introEl.setAttribute('data-intro-phase', 'active');
+          // Force reflow so CSS keyframe animations restart cleanly every time
+          void introEl.offsetWidth;
+          introEl.classList.add('is-active');
+
+          if (withSound) {
+            playWarImpactSound();
+          }
+
+          introTimer = setTimeout(function () {
+            finishIntro(true);
+          }, INTRO_DURATION_MS);
+        }
+
+        // Event wiring
+        padEl.addEventListener('input', function () {
+          saveRules(padEl.value, 'Salvo neste dispositivo');
+        });
+
+        padEl.addEventListener('keydown', function (e) {
+          if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 's') {
+            e.preventDefault();
+            saveRules(padEl.value, 'Decreto selado');
+          }
+        });
+
+        skipIntroBtn.addEventListener('click', function () {
+          finishIntro(true);
+        });
+
+        replayIntroBtn.addEventListener('click', function () {
+          startIntro(true);
+        });
+
+        document.addEventListener('keydown', function (e) {
+          if (e.key === 'Escape' && bodyEl.getAttribute('data-state') === 'intro') {
+            finishIntro(true);
+          }
+        });
+
+        copyBtn.addEventListener('click', function () {
+          var content = padEl.value;
+          if (!content.trim()) {
+            copyBtn.textContent = 'Nada a copiar';
+            if (copyTimer) clearTimeout(copyTimer);
+            copyTimer = setTimeout(function () {
+              copyBtn.textContent = 'Copiar regras';
+            }, 1600);
+            return;
+          }
+
+          var onCopied = function () {
+            copyBtn.textContent = 'Copiado';
+            if (copyTimer) clearTimeout(copyTimer);
+            copyTimer = setTimeout(function () {
+              copyBtn.textContent = 'Copiar regras';
+            }, 1800);
+          };
+
+          if (navigator.clipboard && navigator.clipboard.writeText) {
+            navigator.clipboard.writeText(content).then(onCopied).catch(function () {
+              padEl.select();
+              document.execCommand('copy');
+              onCopied();
+            });
+          } else {
+            padEl.select();
+            document.execCommand('copy');
+            onCopied();
+          }
+        });
+
+        exportBtn.addEventListener('click', function () {
+          var header = 'REGRAS ABSOLUTAS\n========================================\n\n';
+          var blob = new Blob([header + (padEl.value || '')], {
+            type: 'text/plain;charset=utf-8'
+          });
+          var url = URL.createObjectURL(blob);
+          var link = document.createElement('a');
+          link.href = url;
+          link.download = 'regras-absolutas.txt';
+          document.body.appendChild(link);
+          link.click();
+          document.body.removeChild(link);
+          URL.revokeObjectURL(url);
+        });
+
+        clearRequestBtn.addEventListener('click', function () {
+          clearControlsEl.hidden = true;
+          clearConfirmControlsEl.hidden = false;
+          clearCancelBtn.focus();
+        });
+
+        clearCancelBtn.addEventListener('click', function () {
+          clearConfirmControlsEl.hidden = true;
+          clearControlsEl.hidden = false;
+          clearRequestBtn.focus();
+        });
+
+        clearConfirmBtn.addEventListener('click', function () {
+          padEl.value = '';
+          saveRules('', 'Registro expurgado');
+          clearConfirmControlsEl.hidden = true;
+          clearControlsEl.hidden = false;
+          padEl.focus();
+        });
+
+        // Subtle War-Ash & Ember Canvas Backdrop
+        (function initAshCanvas() {
+          var canvas = document.getElementById('ash-canvas');
+          if (!canvas || !canvas.getContext) return;
+          var prefersReduced =
+            window.matchMedia &&
+            window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+          if (prefersReduced) return;
+
+          var ctx = canvas.getContext('2d');
+          var width = 0;
+          var height = 0;
+          var particles = [];
+          var PARTICLE_COUNT = 38;
+
+          function resize() {
+            width = canvas.width = window.innerWidth;
+            height = canvas.height = window.innerHeight;
+          }
+
+          function spawnParticle(randomY) {
+            var isEmber = Math.random() < 0.35;
+            return {
+              x: Math.random() * width,
+              y: randomY ? Math.random() * height : height + 12,
+              vx: (Math.random() - 0.5) * 0.25,
+              vy: -(0.22 + Math.random() * 0.65),
+              size: isEmber ? 1.2 + Math.random() * 1.8 : 1 + Math.random() * 1.4,
+              alpha: isEmber ? 0.25 + Math.random() * 0.45 : 0.08 + Math.random() * 0.14,
+              isEmber: isEmber
+            };
+          }
+
+          resize();
+          window.addEventListener('resize', resize);
+
+          for (var i = 0; i < PARTICLE_COUNT; i++) {
+            particles.push(spawnParticle(true));
+          }
+
+          function tick() {
+            ctx.clearRect(0, 0, width, height);
+            for (var i = 0; i < particles.length; i++) {
+              var p = particles[i];
+              p.x += p.vx;
+              p.y += p.vy;
+              if (p.y < -16 || p.x < -16 || p.x > width + 16) {
+                particles[i] = spawnParticle(false);
+                continue;
+              }
+              ctx.beginPath();
+              ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
+              ctx.fillStyle = p.isEmber
+                ? 'rgba(220, 68, 38, ' + p.alpha + ')'
+                : 'rgba(214, 208, 196, ' + p.alpha + ')';
+              ctx.fill();
+            }
+            window.requestAnimationFrame(tick);
+          }
+
+          window.requestAnimationFrame(tick);
+        })();
+
+        // Boot
+        loadInitialRules();
+        var params = new URLSearchParams(window.location.search);
+        if (params.get('autostart') === '1') {
+          finishIntro(false);
+        } else {
+          startIntro(false);
+        }
+      })();
+    </script>
+  </body>
+</html>
