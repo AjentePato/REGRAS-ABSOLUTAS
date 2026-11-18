@@ -1,0 +1,6 @@
+{
+  "name": "REGRAS ABSOLUTAS",
+  "description": "Códice único e inflexível para escrever regras absolutas, com abertura cinematográfica de guerra e interface sombria.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

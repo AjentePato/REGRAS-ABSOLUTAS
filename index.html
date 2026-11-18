@@ -15,6 +15,13 @@
     />
     <meta property="og:type" content="website" />
     <meta name="twitter:card" content="summary_large_image" />
+    <meta name="theme-color" content="#050506" />
+    <meta name="mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    <meta name="apple-mobile-web-app-title" content="REGRAS" />
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+    <link rel="icon" type="image/svg+xml" href="/icon.svg" />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
@@ -856,6 +863,63 @@
         border: 0;
       }
 
+      /* In-App PWA Install & Offline Surfaces */
+      .ios-modal-backdrop {
+        position: fixed;
+        inset: 0;
+        z-index: 60;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 20px;
+        background: rgba(2, 2, 3, 0.82);
+        backdrop-filter: blur(6px);
+      }
+
+      .ios-modal-card {
+        width: 100%;
+        max-width: 420px;
+        padding: 24px;
+        background: var(--bg-monolith-elevated);
+        border: 1px solid var(--border-iron);
+        box-shadow: 0 24px 60px rgba(0, 0, 0, 0.9);
+      }
+
+      .ios-modal-title {
+        margin: 0 0 10px 0;
+        font-family: var(--font-display);
+        font-size: 18px;
+        font-weight: 700;
+        letter-spacing: 0.08em;
+        color: var(--text-bone);
+      }
+
+      .ios-modal-text {
+        margin: 0 0 18px 0;
+        font-size: 14px;
+        line-height: 1.65;
+        color: var(--text-ash);
+      }
+
+      .ios-modal-text strong {
+        color: var(--text-bone);
+      }
+
+      .offline-banner {
+        position: fixed;
+        left: 20px;
+        bottom: 20px;
+        z-index: 40;
+        padding: 10px 16px;
+        background: #1c120d;
+        border: 1px solid rgba(234, 88, 12, 0.55);
+        color: #fed7aa;
+        font-family: var(--font-mono);
+        font-size: 12px;
+        letter-spacing: 0.04em;
+        box-shadow: 0 12px 30px rgba(0, 0, 0, 0.7);
+      }
+
       /* Responsive Adjustments */
       @media (max-width: 768px) {
         .top-bar-inner {
@@ -998,10 +1062,13 @@
             <span class="meta-sep" aria-hidden="true">·</span>
             <span id="meta-words-count">0 palavras</span>
             <span class="meta-sep" aria-hidden="true">·</span>
-            <span id="meta-save-state">Salvo neste dispositivo</span>
+            <span id="meta-save-state">Sincronizando...</span>
           </div>
 
           <div class="top-actions">
+            <button type="button" id="install-app-btn" class="btn-ghost" hidden>
+              Instalar app
+            </button>
             <button type="button" id="replay-intro-btn" class="btn-ghost">
               Rever abertura
             </button>
@@ -1066,10 +1133,34 @@
 
           <footer class="codex-footer">
             <span id="footer-chars-count">0 caracteres registrados</span>
-            <span>Armazenamento local contínuo · Ctrl+S para selar</span>
+            <span id="footer-sync-mode">Sincronização universal ativa · Ctrl+S para selar</span>
           </footer>
         </section>
       </main>
+    </div>
+
+    <div
+      id="ios-install-modal"
+      class="ios-modal-backdrop"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="ios-modal-title"
+      hidden
+    >
+      <div class="ios-modal-card">
+        <h2 id="ios-modal-title" class="ios-modal-title">Instalar no iPhone / iPad</h2>
+        <p class="ios-modal-text">
+          1. Toque no botão <strong>Compartilhar</strong> na barra do Safari.<br />
+          2. Role para baixo e toque em <strong>Adicionar à Tela de Início</strong>.
+        </p>
+        <button type="button" id="ios-modal-close-btn" class="btn-primary">
+          Entendido
+        </button>
+      </div>
+    </div>
+
+    <div id="offline-banner" class="offline-banner" role="status" hidden>
+      Modo offline — alterações salvas localmente serão sincronizadas ao reconectar.
     </div>
 
     <script>
@@ -1078,7 +1169,10 @@
 
         var STORAGE_TEXT_KEY = 'regras_absolutas_texto_v1';
         var STORAGE_META_KEY = 'regras_absolutas_atualizado_v1';
+        var STORAGE_PENDING_KEY = 'regras_absolutas_pendente_v1';
         var INTRO_DURATION_MS = 3850;
+        var SYNC_DEBOUNCE_MS = 450;
+        var SYNC_POLL_MS = 8000;
 
         var DEFAULT_RULES = [
           '1. O que foi decidido aqui não volta à mesa de discussão.',
@@ -1092,6 +1186,10 @@
         var introEl = document.getElementById('war-intro');
         var skipIntroBtn = document.getElementById('skip-intro-btn');
         var replayIntroBtn = document.getElementById('replay-intro-btn');
+        var installAppBtn = document.getElementById('install-app-btn');
+        var iosModalEl = document.getElementById('ios-install-modal');
+        var iosModalCloseBtn = document.getElementById('ios-modal-close-btn');
+        var offlineBannerEl = document.getElementById('offline-banner');
         var padEl = document.getElementById('codex-pad');
         var monolithEl = document.getElementById('codex-monolith');
         var rulesCountEl = document.getElementById('meta-rules-count');
@@ -1099,6 +1197,7 @@
         var saveStateEl = document.getElementById('meta-save-state');
         var lastUpdatedEl = document.getElementById('last-updated-label');
         var footerCharsEl = document.getElementById('footer-chars-count');
+        var footerSyncModeEl = document.getElementById('footer-sync-mode');
         var copyBtn = document.getElementById('copy-rules-btn');
         var exportBtn = document.getElementById('export-txt-btn');
         var clearControlsEl = document.getElementById('clear-controls');
@@ -1110,6 +1209,13 @@
         var introTimer = null;
         var copyTimer = null;
         var savePulseTimer = null;
+        var syncDebounceTimer = null;
+        var deferredInstallPrompt = null;
+        var isInstalledPWA = false;
+        var isIOSDevice = false;
+        var storageMode = 'server';
+        var lastLocalInputAt = 0;
+        var syncInFlight = false;
 
         function computeStats(text) {
           var normalized = (text || '').replace(/\r\n/g, '\n');
@@ -1166,6 +1272,122 @@
           lastUpdatedEl.textContent = formatTime(updatedIso);
         }
 
+        function storageModeLabel(mode) {
+          return mode === 'supabase' ? 'Sincronizado · Supabase' : 'Sincronizado · Universal';
+        }
+
+        function updateFooterMode(mode) {
+          storageMode = mode || storageMode;
+          footerSyncModeEl.textContent =
+            storageMode === 'supabase'
+              ? 'Sincronização universal via Supabase · Ctrl+S para selar'
+              : 'Sincronização universal ativa · Ctrl+S para selar';
+        }
+
+        function setPendingSync(pending) {
+          try {
+            if (pending) {
+              window.localStorage.setItem(STORAGE_PENDING_KEY, '1');
+            } else {
+              window.localStorage.removeItem(STORAGE_PENDING_KEY);
+            }
+          } catch (_) {}
+        }
+
+        function hasPendingSync() {
+          try {
+            return window.localStorage.getItem(STORAGE_PENDING_KEY) === '1';
+          } catch (_) {
+            return false;
+          }
+        }
+
+        function writeLocalCache(text, updatedIso) {
+          try {
+            window.localStorage.setItem(STORAGE_TEXT_KEY, text);
+            window.localStorage.setItem(STORAGE_META_KEY, updatedIso);
+          } catch (_) {}
+        }
+
+        function pushRulesToServer(text, customLabel) {
+          if (!navigator.onLine) {
+            setPendingSync(true);
+            saveStateEl.textContent = 'Offline · Salvo localmente';
+            return Promise.resolve(false);
+          }
+
+          syncInFlight = true;
+          return fetch('/api/rules', {
+            method: 'PUT',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({text: text})
+          })
+            .then(function (res) {
+              if (!res.ok) throw new Error('HTTP ' + res.status);
+              return res.json();
+            })
+            .then(function (data) {
+              setPendingSync(false);
+              var updatedIso = data.updatedAt || new Date().toISOString();
+              writeLocalCache(text, updatedIso);
+              updateStatsUI(text, updatedIso);
+              updateFooterMode(data.storageMode);
+              saveStateEl.textContent = customLabel || storageModeLabel(data.storageMode);
+              return true;
+            })
+            .catch(function () {
+              setPendingSync(true);
+              saveStateEl.textContent = 'Salvo localmente · Pendente';
+              return false;
+            })
+            .finally(function () {
+              syncInFlight = false;
+            });
+        }
+
+        function pullRulesFromServer(isInitialLoad) {
+          if (!navigator.onLine || syncInFlight) return Promise.resolve();
+          if (!isInitialLoad && Date.now() - lastLocalInputAt < 2500) {
+            return Promise.resolve();
+          }
+
+          if (hasPendingSync()) {
+            return pushRulesToServer(padEl.value);
+          }
+
+          return fetch('/api/rules', {cache: 'no-store'})
+            .then(function (res) {
+              if (!res.ok) throw new Error('HTTP ' + res.status);
+              return res.json();
+            })
+            .then(function (data) {
+              if (typeof data.text !== 'string') return;
+              if (!isInitialLoad && Date.now() - lastLocalInputAt < 2500) return;
+              if (hasPendingSync()) return;
+
+              var serverUpdated = data.updatedAt || new Date().toISOString();
+              if (padEl.value !== data.text) {
+                var selStart = padEl.selectionStart;
+                var selEnd = padEl.selectionEnd;
+                padEl.value = data.text;
+                if (document.activeElement === padEl) {
+                  try {
+                    padEl.setSelectionRange(selStart, selEnd);
+                  } catch (_) {}
+                }
+              }
+              writeLocalCache(data.text, serverUpdated);
+              updateStatsUI(data.text, serverUpdated);
+              updateFooterMode(data.storageMode);
+              saveStateEl.textContent = storageModeLabel(data.storageMode);
+            })
+            .catch(function () {
+              if (!navigator.onLine) {
+                saveStateEl.textContent = 'Modo offline · Local';
+              }
+            });
+        }
+
         function loadInitialRules() {
           var saved = null;
           var updated = null;
@@ -1178,38 +1400,120 @@
 
           if (saved === null) {
             padEl.value = DEFAULT_RULES;
-            try {
-              var nowIso = new Date().toISOString();
-              window.localStorage.setItem(STORAGE_TEXT_KEY, DEFAULT_RULES);
-              window.localStorage.setItem(STORAGE_META_KEY, nowIso);
-              updated = nowIso;
-            } catch (_) {
-              updated = null;
-            }
+            var nowIso = new Date().toISOString();
+            writeLocalCache(DEFAULT_RULES, nowIso);
+            updated = nowIso;
           } else {
             padEl.value = saved;
           }
 
           updateStatsUI(padEl.value, updated);
+          pullRulesFromServer(true);
         }
 
-        function saveRules(text, labelText) {
+        function saveRules(text, labelText, immediateRemote) {
+          lastLocalInputAt = Date.now();
           var nowIso = new Date().toISOString();
-          try {
-            window.localStorage.setItem(STORAGE_TEXT_KEY, text);
-            window.localStorage.setItem(STORAGE_META_KEY, nowIso);
-          } catch (_) {
-            // Ignore quota/storage errors in restricted contexts
-          }
+          writeLocalCache(text, nowIso);
+          setPendingSync(true);
           updateStatsUI(text, nowIso);
-          saveStateEl.textContent = labelText || 'Salvo neste dispositivo';
 
           monolithEl.classList.add('is-writing');
           if (savePulseTimer) clearTimeout(savePulseTimer);
           savePulseTimer = setTimeout(function () {
             monolithEl.classList.remove('is-writing');
           }, 320);
+
+          if (syncDebounceTimer) clearTimeout(syncDebounceTimer);
+
+          if (immediateRemote) {
+            saveStateEl.textContent = navigator.onLine ? 'Sincronizando...' : 'Offline · Salvo localmente';
+            pushRulesToServer(text, labelText);
+            return;
+          }
+
+          saveStateEl.textContent = navigator.onLine ? 'Salvando...' : 'Offline · Salvo localmente';
+          syncDebounceTimer = setTimeout(function () {
+            pushRulesToServer(text, labelText);
+          }, SYNC_DEBOUNCE_MS);
         }
+
+        // PWA Installability & Online/Offline Status
+        function updateInstallButtonVisibility() {
+          if (isInstalledPWA) {
+            installAppBtn.hidden = true;
+            return;
+          }
+          if (deferredInstallPrompt || isIOSDevice) {
+            installAppBtn.hidden = false;
+          } else {
+            installAppBtn.hidden = true;
+          }
+        }
+
+        function updateOnlineStatusUI() {
+          var online = typeof navigator !== 'undefined' ? navigator.onLine : true;
+          offlineBannerEl.hidden = online;
+          if (online && hasPendingSync()) {
+            pushRulesToServer(padEl.value);
+          } else if (!online) {
+            saveStateEl.textContent = 'Offline · Salvo localmente';
+          }
+        }
+
+        (function initPWA() {
+          isInstalledPWA =
+            (window.matchMedia && window.matchMedia('(display-mode: standalone)').matches) ||
+            window.navigator.standalone === true;
+
+          var ua = (window.navigator.userAgent || '').toLowerCase();
+          isIOSDevice = /iphone|ipad|ipod/.test(ua);
+
+          updateInstallButtonVisibility();
+          updateOnlineStatusUI();
+
+          window.addEventListener('beforeinstallprompt', function (e) {
+            e.preventDefault();
+            deferredInstallPrompt = e;
+            updateInstallButtonVisibility();
+          });
+
+          window.addEventListener('appinstalled', function () {
+            isInstalledPWA = true;
+            deferredInstallPrompt = null;
+            updateInstallButtonVisibility();
+          });
+
+          window.addEventListener('online', function () {
+            updateOnlineStatusUI();
+            pullRulesFromServer(false);
+          });
+
+          window.addEventListener('offline', updateOnlineStatusUI);
+
+          installAppBtn.addEventListener('click', function () {
+            if (deferredInstallPrompt) {
+              deferredInstallPrompt.prompt();
+              deferredInstallPrompt.userChoice.then(function (choice) {
+                if (choice && choice.outcome === 'accepted') {
+                  isInstalledPWA = true;
+                  deferredInstallPrompt = null;
+                  updateInstallButtonVisibility();
+                }
+              });
+              return;
+            }
+            if (isIOSDevice) {
+              iosModalEl.hidden = false;
+              iosModalCloseBtn.focus();
+            }
+          });
+
+          iosModalCloseBtn.addEventListener('click', function () {
+            iosModalEl.hidden = true;
+            installAppBtn.focus();
+          });
+        })();
 
         // Synthesized Web Audio war-film sub-bass boom (only when user initiates replay)
         function playWarImpactSound() {
@@ -1219,7 +1523,6 @@
             var ctx = new AudioCtx();
             var now = ctx.currentTime;
 
-            // Deep sub-bass drop
             var osc = ctx.createOscillator();
             var gain = ctx.createGain();
             osc.type = 'sawtooth';
@@ -1246,9 +1549,7 @@
                 ctx.close().catch(function () {});
               }
             }, 2200);
-          } catch (_) {
-            // Audio unavailable
-          }
+          } catch (_) {}
         }
 
         function finishIntro(focusPad) {
@@ -1284,7 +1585,6 @@
           introEl.classList.remove('is-hidden');
           introEl.classList.remove('is-active');
           introEl.setAttribute('data-intro-phase', 'active');
-          // Force reflow so CSS keyframe animations restart cleanly every time
           void introEl.offsetWidth;
           introEl.classList.add('is-active');
 
@@ -1299,13 +1599,13 @@
 
         // Event wiring
         padEl.addEventListener('input', function () {
-          saveRules(padEl.value, 'Salvo neste dispositivo');
+          saveRules(padEl.value, null, false);
         });
 
         padEl.addEventListener('keydown', function (e) {
           if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 's') {
             e.preventDefault();
-            saveRules(padEl.value, 'Decreto selado');
+            saveRules(padEl.value, 'Decreto selado', true);
           }
         });
 
@@ -1318,10 +1618,33 @@
         });
 
         document.addEventListener('keydown', function (e) {
-          if (e.key === 'Escape' && bodyEl.getAttribute('data-state') === 'intro') {
-            finishIntro(true);
+          if (e.key === 'Escape') {
+            if (!iosModalEl.hidden) {
+              iosModalEl.hidden = true;
+              installAppBtn.focus();
+              return;
+            }
+            if (bodyEl.getAttribute('data-state') === 'intro') {
+              finishIntro(true);
+            }
           }
         });
+
+        window.addEventListener('focus', function () {
+          pullRulesFromServer(false);
+        });
+
+        document.addEventListener('visibilitychange', function () {
+          if (document.visibilityState === 'visible') {
+            pullRulesFromServer(false);
+          }
+        });
+
+        setInterval(function () {
+          if (document.visibilityState === 'visible') {
+            pullRulesFromServer(false);
+          }
+        }, SYNC_POLL_MS);
 
         copyBtn.addEventListener('click', function () {
           var content = padEl.value;
@@ -1384,7 +1707,7 @@
 
         clearConfirmBtn.addEventListener('click', function () {
           padEl.value = '';
-          saveRules('', 'Registro expurgado');
+          saveRules('', 'Registro expurgado', true);
           clearConfirmControlsEl.hidden = true;
           clearControlsEl.hidden = false;
           padEl.focus();
